@@ -21,7 +21,7 @@ es = Elasticsearch(
 
 sqsQurl = "https://sqs.us-east-1.amazonaws.com/521424315900/DiningChatbotQueue"
 SENDER = "cloudspring2022@gmail.com"
-sqsclient = boto3.client('sqs',  region_name='us-east-1',aws_access_key_id='AKIAXSZ2PUX6MSXMFKPF',aws_secret_access_key='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')
+sqsclient = boto3.client('sqs',  region_name='us-east-1',aws_access_key_id='***************',aws_secret_access_key='******************')
 
 def add_user_prefs(cuisinetype, recos):
     aws_access_key_id = 'AKIAXSZ2PUX6MSXMFKPF'
@@ -39,8 +39,8 @@ def add_user_prefs(cuisinetype, recos):
 
 def restaurants_data(index):
     
-    aws_access_key_id = 'AKIAXSZ2PUX6MSXMFKPF'
-    aws_secret_access_key = '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'
+    aws_access_key_id = '***************'
+    aws_secret_access_key = '***************'
 
     dynamodb = boto3.resource('dynamodb', aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key, region_name='us-east-1')
     

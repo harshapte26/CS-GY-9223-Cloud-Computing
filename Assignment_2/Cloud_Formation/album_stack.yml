@@ -1,0 +1,117 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Metadata:
+    Generator: "former2"
+Description: ""
+Resources:
+    S3Bucket:
+        Type: "AWS::S3::Bucket"
+        Properties:
+            BucketName: "album-photo-store-ha1"
+
+    S3Bucket2:
+        Type: "AWS::S3::Bucket"
+        Properties:
+            BucketName: "smart-photo-album-frontend-ha1"
+
+    S3BucketPolicy:
+        Type: "AWS::S3::BucketPolicy"
+        Properties:
+            Bucket: !Ref S3Bucket
+            PolicyDocument: 
+                Version: "2012-10-17"
+                Id: "Policy1649476584882"
+                Statement: 
+                  - 
+                    Sid: "Stmt1649476582646"
+                    Effect: "Allow"
+                    Principal: "*"
+                    Action: "s3:GetObject"
+                    Resource: !Sub "arn:aws:s3:::${S3Bucket}/*"
+
+    S3BucketPolicy2:
+        Type: "AWS::S3::BucketPolicy"
+        Properties:
+            Bucket: !Ref S3Bucket2
+            PolicyDocument: 
+                Version: "2012-10-17"
+                Statement: 
+                  - 
+                    Sid: "PublicReadGetObject"
+                    Effect: "Allow"
+                    Principal: "*"
+                    Action: "s3:*"
+                    Resource: !Sub "arn:aws:s3:::${S3Bucket2}/*"
+
+    LambdaFunction:
+        Type: "AWS::Lambda::Function"
+        Properties:
+            Description: ""
+            FunctionName: "index-lf-ha1"
+            Handler: "lambda_function.lambda_handler"
+            Architectures: 
+              - "x86_64"
+            Code: 
+                S3Bucket: "dining-chatbot-cloud"
+                S3Key: "index_photos.py.zip"
+                # S3ObjectVersion: "NgJ0D2NYG3zi9dUpFaYTYB_CGeAb1c7X"
+            MemorySize: 128
+            Role: !Sub "arn:aws:iam::${AWS::AccountId}:role/S3Upload"
+            Runtime: "python3.9"
+            Timeout: 3
+            TracingConfig: 
+                Mode: "PassThrough"
+            Layers: 
+              - !Sub "arn:aws:lambda:${AWS::Region}:770693421928:layer:Klayers-p38-boto3:2"
+              - !Sub "arn:aws:lambda:${AWS::Region}:770693421928:layer:Klayers-p38-requests:2"
+              - !Sub "arn:aws:lambda:${AWS::Region}:770693421928:layer:Klayers-p38-opensearch-py:1"
+
+    LambdaFunction2:
+        Type: "AWS::Lambda::Function"
+        Properties:
+            Description: ""
+            FunctionName: "search-lf-ha1"
+            Handler: "lambda_function.lambda_handler"
+            Architectures: 
+              - "x86_64"
+            Code: 
+                S3Bucket: "dining-chatbot-cloud"
+                S3Key: "search_photos.py.zip"
+                # S3ObjectVersion: "qdODs5ycA1F2KzO_e8Lv43ronMzCsgs2"
+            MemorySize: 128
+            Role: !Sub "arn:aws:iam::${AWS::AccountId}:role/S3Upload"
+            Runtime: "python3.7"
+            Timeout: 3
+            TracingConfig: 
+                Mode: "PassThrough"
+            Layers: 
+              - !Sub "arn:aws:lambda:${AWS::Region}:770693421928:layer:Klayers-p38-boto3:2"
+              - !Sub "arn:aws:lambda:${AWS::Region}:113088814899:layer:Klayers-python37-requests:14"
+              - !Sub "arn:aws:lambda:${AWS::Region}:770693421928:layer:Klayers-p38-aws-requests-auth:1"
+              - !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:layer:requests_aws4auth:1"
+
+    ApiGatewayRestApi:
+        Type: "AWS::ApiGateway::RestApi"
+        Properties:
+            Name: "Photo Search HA1"
+            ApiKeySourceType: "HEADER"
+            BinaryMediaTypes: 
+              - "image/jpg"
+              - "image/jpeg"
+              - "image/png"
+              - "image/webp"
+            EndpointConfiguration: 
+                Types: 
+                  - "REGIONAL"
+
+    OpenSearchServiceDomain:
+        Type: "AWS::OpenSearchService::Domain"
+        Properties:
+            DomainName: "photos-ha1"
+            EngineVersion: "OpenSearch_1.2"
+            ClusterConfig: 
+                InstanceType: "t3.small.search"
+            EBSOptions: 
+                EBSEnabled: true
+                VolumeType: "gp2"
+                VolumeSize: 10
+
